@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>考试 - 学习通模拟（逐题分页，不允许整卷预览）</title>
+<style>
+  body { font-family: -apple-system, "Microsoft YaHei", sans-serif; margin: 0; padding: 16px 20px; }
+  .mark_info { background: #fff7e6; border: 1px solid #ffd591; padding: 8px 12px; margin-bottom: 14px; font-size: 13px; }
+  .TiMu { border-bottom: 1px solid #eee; padding: 10px 0 16px; }
+  .Zy_TItle { font-weight: 600; margin-bottom: 8px; }
+  .newZy_TItle { color: #1e6fff; margin-right: 4px; }
+  ul.Zy_ulTop { list-style: none; padding-left: 0; margin: 0; }
+  li.before-after { padding: 6px 0; cursor: pointer; }
+  li.before-after[aria-checked="true"] .num_option { background: #1e6fff; color: #fff; }
+  .num_option { display: inline-block; width: 18px; text-align: center; border: 1px solid #999; border-radius: 3px; margin-right: 6px; }
+  .nextDiv { margin-top: 18px; }
+  .jb_btn { display: inline-block; padding: 6px 16px; background: #1e6fff; color: #fff; border-radius: 4px; cursor: pointer; }
+  .btnSubmit { display: inline-block; padding: 6px 16px; background: #52c41a; color: #fff; border-radius: 4px; cursor: pointer; margin-left: 10px; }
+</style>
+</head>
+<body>
+<!-- 分页考试的特征：.mark_info 明确"不允许整卷预览" -->
+<div class="mark_info">考试须知：本场考试不允许整卷预览，请逐题作答后点击「下一题」。</div>
+<div id="pageWrap"></div>
+<div class="nextDiv" id="nextDiv"></div>
+<a class="btnSubmit" id="submitBtn">提交</a>
+<div id="log"></div>
+
+<script>
+  // t26/L4：默认 3 页（覆盖"3 页以上翻到底"）；?loop=1 时无限翻页（覆盖页数上限保护）
+  var LOOP = /[?&]loop=1/.test(location.search);
+  var PAGES = [
+    {
+      qid: 'p1', type: '0', label: '【单选题】', stem: '以下哪个是传输层协议？',
+      options: [['A', 'TCP'], ['B', 'HTTP'], ['C', 'DNS'], ['D', 'FTP']]
+    },
+    {
+      qid: 'p2', type: '3', label: '【判断题】', stem: 'TCP 是面向连接的协议。',
+      options: [['true', '对'], ['false', '错']]
+    },
+    {
+      qid: 'p3', type: '0', label: '【单选题】', stem: '以下哪个是应用层协议？',
+      options: [['A', 'HTTP'], ['B', 'TCP'], ['C', 'IP'], ['D', 'ARP']]
+    }
+  ];
+
+  // 当前页定义：loop 模式下每页内容都不同（签名不重复），且永远有「下一题」
+  function pageDef() {
+    if (!LOOP) return PAGES[page];
+    return {
+      qid: 'p' + (page + 1), type: '0', label: '【单选题】',
+      stem: '循环第 ' + (page + 1) + ' 题：以下哪个是传输层协议？',
+      options: [['A', 'TCP'], ['B', 'HTTP'], ['C', 'DNS'], ['D', 'FTP']]
+    };
+  }
+  function hasNext() { return LOOP || page < PAGES.length - 1; }
+
+  window.__TEST = {
+    pageViews: 0,      // 渲染页数（断言"翻了几页"）
+    nextClicks: 0,     // 点「下一题」次数
+    submitClicked: false,
+    optionClicks: 0,
+    firstClickAt: 0,
+    pageSeen: [],
+    answers: {},
+    state: function () {
+      // 翻页会重建 DOM，所以除了当前页的 hidden，还要记住已经答过的页
+      var out = {};
+      var T = window.__TEST;
+      Object.keys(T.answers).forEach(function (k) { out[k] = T.answers[k]; });
+      // 只回放"见过的题"（loop 模式没有固定 PAGES 列表）
+      Object.keys(T.answers).forEach(function (k) {
+        var h = document.getElementById('answer' + k);
+        if (h) out[k] = h.value;
+      });
+      return out;
+    },
+    logs: []
+  };
+
+  function log(msg) { window.__TEST.logs.push(msg); }
+
+  function addChoice(li) {
+    var qid = li.getAttribute('qid');
+    var type = li.getAttribute('qtype');
+    var T = window.__TEST;
+    T.optionClicks++;
+    if (!T.firstClickAt) T.firstClickAt = Date.now();
+    var num = li.querySelector('span.num_option');
+    var val = num ? num.getAttribute('data') : '';
+    var hidden = document.getElementById('answer' + qid);
+    var ul = li.parentElement;
+    var wasOn = li.getAttribute('aria-checked') === 'true';
+    if (type === '1') {
+      li.setAttribute('aria-checked', wasOn ? 'false' : 'true');
+      var picked = Array.prototype.slice.call(ul.querySelectorAll('li[aria-checked="true"]'))
+        .map(function (x) { return x.querySelector('span.num_option').getAttribute('data'); }).join('');
+      if (hidden) hidden.value = picked;
+      T.answers[qid] = hidden ? hidden.value : '';
+    } else {
+      Array.prototype.slice.call(ul.querySelectorAll('li.before-after')).forEach(function (x) {
+        x.setAttribute('aria-checked', 'false');
+      });
+      if (wasOn) { if (hidden) hidden.value = ''; }
+      else {
+        li.setAttribute('aria-checked', 'true');
+        if (hidden) hidden.value = val;
+      }
+      T.answers[qid] = hidden ? hidden.value : '';
+    }
+  }
+  window.addChoice = addChoice;
+
+  function render() {
+    var p = pageDef();
+    var T = window.__TEST;
+    T.pageViews++;
+    T.pageSeen.push(p.qid);
+    var wrap = document.getElementById('pageWrap');
+    var html = '<div class="singleQuesId" data="' + p.qid + '">' +
+      '<div class="TiMu newTiMu" data="' + p.type + '">' +
+      '<div class="Zy_TItle clearfix"><i class="fl" role="option">' + (page + 1) + '</i>' +
+      '<div class="clearfix fontLabel"><span class="newZy_TItle">' + p.label + '</span>' +
+      '<p style="display:inline">' + p.stem + '</p></div></div>' +
+      '<div class="clearfix"><ul class="Zy_ulTop w-top fl">';
+    p.options.forEach(function (o) {
+      var role = p.type === '1' ? 'checkbox' : 'radio';
+      html += '<li class="before-after" onclick="addChoice(this);" qid="' + p.qid + '" qtype="' + p.type +
+        '" role="' + role + '" aria-label="' + o[0] + ' 选项选择" aria-checked="false">' +
+        '<label class="fl before"><span class="num_option" name="answer' + p.qid + '" data="' + o[0] + '">' +
+        o[0] + '</span></label><a class="fl after"><p>' + o[1] + '</p></a><div class="clear"></div></li>';
+    });
+    html += '</ul>' +
+      '<input type="hidden" name="answer' + p.qid + '" id="answer' + p.qid + '" value="">' +
+      '<input type="hidden" id="answertype' + p.qid + '" name="answertype' + p.qid + '" value="' + p.type + '">' +
+      '</div></div></div>';
+    wrap.innerHTML = html;
+    log('[page] 渲染第 ' + (page + 1) + ' 题：' + p.stem);
+
+    var nd = document.getElementById('nextDiv');
+    if (hasNext()) {
+      nd.innerHTML = '<a class="jb_btn">下一题</a>';
+      nd.querySelector('.jb_btn').addEventListener('click', function () {
+        window.__TEST.nextClicks++;
+        page++;
+        render();
+      });
+    } else {
+      // 最后一页：没有「下一题」→ 脚本必须能正常退出，不能死循环
+      nd.innerHTML = '';
+      log('[page] 已是最后一题（第 ' + (page + 1) + ' 页），没有下一题按钮');
+    }
+  }
+
+  var page = 0;
+  document.getElementById('submitBtn').addEventListener('click', function () {
+    window.__TEST.submitClicked = true;
+    log('[page] 被点了提交');
+  });
+  render();
+</script>
+<script src="/user.js"></script>
+</body>
+</html>

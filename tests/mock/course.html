@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>第1节 - 学习通模拟</title>
+<style>
+  body { margin: 0; font-family: "Microsoft YaHei", sans-serif; background: #f5f6fa; }
+  .layout { display: flex; height: 100vh; }
+  .main { flex: 1; position: relative; }
+  #iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .posCatalog { width: 240px; border-left: 1px solid #ddd; background: #fff; overflow: auto; }
+  .chapter_item { padding: 10px 12px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 13px; }
+  .chapter_item.currents { color: #1e6fff; border-left: 3px solid #1e6fff; background: #f0f6ff; }
+  #log { position: absolute; right: 8px; bottom: 8px; font-size: 11px; color: #999; white-space: pre-wrap; max-width: 60%; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="main">
+    <!-- 真实链路：顶层 → #iframe(cards) → iframe.ans-insertvideo-online(视频+弹题) -->
+    <iframe id="iframe" name="iframe"></iframe>
+    <div id="log"></div>
+  </div>
+  <div class="posCatalog" id="catalog">
+    <div class="chapter_item currents" data-idx="0" onclick="void 0"><a href="javascript:void(0)">第1节 视频任务点</a></div>
+    <div class="chapter_item" data-idx="1" onclick="void 0"><a href="javascript:void(0)">第2节 视频任务点</a></div>
+    <div class="chapter_item" data-idx="2" onclick="void 0"><a href="javascript:void(0)">第3节 视频任务点</a></div>
+  </div>
+</div>
+<!-- t8 桩：平台日上限提示框（真实选择器 .maskDiv.jobCountDiv）。
+     默认隐藏；带 ?dailyLimit=1 时显示，用来验证"识别到提示就不自动跳转"。 -->
+<div class="maskDiv jobCountDiv" id="jobCountDiv" style="display:none">
+  今日视频任务点完成数已达上限，您可以观看视频，但无法完成任务点
+</div>
+<script>
+  var nodes = Array.prototype.slice.call(document.querySelectorAll('.chapter_item'));
+  var logEl = document.getElementById('log');
+  var switches = 0;
+
+  // t8：?dailyLimit=1 → 显示日上限提示（同时保持 catalog 里没有任何完成标记，
+  // 这样 waitForCompletion 不会介入，测试只看"日上限是否阻止跳转"）
+  if (/[?&]dailyLimit=1/.test(location.search)) {
+    document.getElementById('jobCountDiv').style.display = 'block';
+  }
+
+  function log(msg) {
+    window.__TEST.pageLogs.push(msg);
+    if (logEl) logEl.textContent = window.__TEST.pageLogs.join('\n');
+  }
+
+  // 最深一层：cards → video-frame 的 window.__TEST
+  function deepestTest() {
+    try {
+      var cards = document.getElementById('iframe');
+      var cd = cards && cards.contentDocument;
+      if (!cd) return null;
+      var vf = cd.getElementById('vf');
+      var vd = vf && vf.contentDocument;
+      return vd && vd.defaultView ? vd.defaultView.__TEST : null;
+    } catch (e) { return null; }
+  }
+
+  function deepestVideo() {
+    try {
+      var cards = document.getElementById('iframe');
+      var cd = cards && cards.contentDocument;
+      if (!cd) return null;
+      var vf = cd.getElementById('vf');
+      var vd = vf && vf.contentDocument;
+      return vd ? vd.getElementById('video_html5_api') : null;
+    } catch (e) { return null; }
+  }
+
+  window.__TEST = {
+    pageLogs: [],
+    switches: function () { return switches; },
+    currentIdx: function () { return nodes.findIndex(function (n) { return n.classList.contains('currents'); }); },
+    video: deepestVideo,
+    childTest: deepestTest,
+    picked: function () { var t = deepestTest(); return t ? t.picked() : []; },
+    pickedText: function () { var t = deepestTest(); return t ? t.pickedText() : []; },
+    quizSubmitted: function () { var t = deepestTest(); return !!(t && t.quizSubmitted); },
+    submitPayload: function () { var t = deepestTest(); return t ? t.submitPayload : null; },
+    continueClicked: function () { var t = deepestTest(); return !!(t && t.continueClicked); },
+    liClicks: function () { var t = deepestTest(); return t ? t.liClicks() : 0; },
+  };
+  // 子 frame 的视频日志汇总给顶层测试用（jump.e2e 读 __TEST.logs）
+  Object.defineProperty(window.__TEST, 'logs', {
+    get: function () { var t = deepestTest(); return t ? t.logs : []; },
+  });
+
+  document.getElementById('iframe').src = 'cards.html' + (location.search || '');
+
+  nodes.forEach(function (n) {
+    n.addEventListener('click', function () {
+      var idx = Number(n.dataset.idx);
+      if (idx === window.__TEST.currentIdx()) { log('[page] 点击当前节，忽略'); return; }
+      switches++;
+      log('[page] 切换到第 ' + (idx + 1) + ' 节');
+      nodes.forEach(function (x) { x.classList.remove('currents'); });
+      n.classList.add('currents');
+      // 换节 = iframe 重新加载（真实新版行为），视频帧重新注入脚本
+      document.getElementById('iframe').src =
+        'cards.html' + (location.search || '') + '&ch=' + idx;
+    });
+  });
+</script>
+<script src="/user.js"></script>
+</body>
+</html>

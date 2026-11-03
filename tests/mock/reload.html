@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>整页换节 - 学习通模拟</title>
+<style>
+  body { margin: 0; font-family: "Microsoft YaHei", sans-serif; background: #f5f6fa; }
+  .layout { display: flex; height: 100vh; }
+  .main { flex: 1; padding: 10px; }
+  .posCatalog { width: 220px; border-left: 1px solid #ddd; background: #fff; overflow: auto; }
+  .chapter_item { padding: 10px 12px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 13px; }
+  .chapter_item.currents { color: #1e6fff; border-left: 3px solid #1e6fff; background: #f0f6ff; }
+  video { width: 100%; max-height: 55vh; background: #000; }
+  #log { font-size: 12px; color: #666; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="main">
+    <video id="video_html5_api" src="/test.webm" muted preload="auto"></video>
+    <div id="log"></div>
+  </div>
+  <div class="posCatalog" id="catalog"></div>
+</div>
+<script>
+  // 模拟旧版 #prevNextFocusNext：点目录 = **整页跳转**（sessionStorage 与 jump_guard 都保留）
+  var params = new URLSearchParams(location.search);
+  var ch = Number(params.get('ch') || 0);
+  var cfgQ = params.get('cfg') ? '&cfg=' + encodeURIComponent(params.get('cfg')) : '';
+  var nextHref = '/reload.html?ch=' + (ch + 1) + cfgQ;
+
+  var loads = Number(sessionStorage.getItem('test_reload_loads') || 0) + 1;
+  try { sessionStorage.setItem('test_reload_loads', String(loads)); } catch (e) { /* 忽略 */ }
+
+  var titles = ch === 0 ? ['第1节 视频任务点', '第2节 视频任务点']
+    : ch === 1 ? ['第2节 视频任务点', '第3节 视频任务点']
+      : ['第3节 视频任务点'];
+  // 当前节点始终是列表里的第 0 项 → catalogKey 前后一致（'c0'），
+  // 这样整页 reload 后视频身份键完全相同，正好用来验证 cxas_jump_guard 是否生效。
+  var catalog = document.getElementById('catalog');
+  window.__TEST = {
+    ch: ch,
+    loads: loads,
+    clicks: 0,
+    pageLogs: [],
+    video: function () { return document.getElementById('video_html5_api'); },
+    logs: [],
+    currentIdx: function () {
+      var nodes = Array.prototype.slice.call(document.querySelectorAll('.chapter_item'));
+      return nodes.findIndex(function (n) { return n.classList.contains('currents'); });
+    },
+  };
+  titles.forEach(function (t, i) {
+    var d = document.createElement('div');
+    d.className = 'chapter_item' + (i === 0 ? ' currents' : '');
+    d.setAttribute('data-idx', String(i));
+    d.innerHTML = '<a href="javascript:void(0)">' + t + '</a>';
+    d.addEventListener('click', function () {
+      if (i === 0) return;               // 点当前节忽略
+      window.__TEST.clicks++;
+      location.href = nextHref;          // 整页跳转
+    });
+    catalog.appendChild(d);
+  });
+
+  var v = document.getElementById('video_html5_api');
+  ['play', 'pause', 'ended', 'seeking', 'loadedmetadata'].forEach(function (ev) {
+    v.addEventListener(ev, function () {
+      window.__TEST.logs.push('[video] ' + ev + (ev === 'loadedmetadata' ? ' duration=' + v.duration.toFixed(2) : ''));
+      document.getElementById('log').textContent = window.__TEST.logs.join('\n');
+    });
+  });
+</script>
+<script src="/user.js"></script>
+</body>
+</html>

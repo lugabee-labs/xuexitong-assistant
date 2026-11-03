@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>面板指纹测试页</title>
+<style>
+  body { margin: 0; font-family: "Microsoft YaHei", sans-serif; background: #f5f6fa; }
+  .posCatalog { width: 220px; height: 100vh; border-right: 1px solid #ddd; background: #fff; }
+  .chapter_item { padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 13px; }
+</style>
+</head>
+<body>
+<!-- 供 hud.e2e 用：页面里只有目录（触发脚本建面板），脚本由测试手动注入，便于断言两次加载 id 不同 -->
+<div class="posCatalog" id="catalog">
+  <div class="chapter_item currents"><a href="javascript:void(0)">第1节</a></div>
+  <div class="chapter_item"><a href="javascript:void(0)">第2节</a></div>
+</div>
+
+<!-- 放一个可见的 video：tickVideo 要先"检测到视频"才会走作息时段闸门，
+     本页用来验证面板文案与 lastAction（不真正播放） -->
+<video id="v" style="position:fixed;left:0;bottom:0;width:320px;height:180px;background:#000"></video>
+</body>
+</html>

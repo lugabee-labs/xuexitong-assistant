@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>章节测验 - 学习通模拟</title>
+<style>
+  body { margin: 0; font-family: "Microsoft YaHei", sans-serif; background: #f5f6fa; padding: 16px; }
+  .singleQuesId { background: #fff; border: 1px solid #e3e6ea; border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+  .Zy_TItle { font-size: 14px; font-weight: 600; margin-bottom: 10px; overflow: hidden; }
+  .Zy_TItle > i.fl { float: left; margin-right: 6px; font-style: normal; }
+  .newZy_TItle { color: #1e6fff; margin-right: 6px; }
+  .Zy_ulTop { list-style: none; margin: 0; padding: 0; clear: both; }
+  .Zy_ulTop > li { padding: 6px 4px; font-size: 13px; cursor: pointer; overflow: hidden; }
+  .Zy_ulTop > li[aria-checked="true"] { background: #eef4ff; }
+  .num_option { display: inline-block; width: 18px; text-align: center; color: #888; }
+  .check_answer { color: #2e7d32; margin-left: 6px; font-size: 12px; }
+  .fl { float: left; margin-right: 6px; }
+  .clear { clear: both; }
+  .btnSubmit { display: inline-block; padding: 8px 20px; border-radius: 6px; background: #1e6fff; color: #fff; cursor: pointer; }
+  #result { display: none; margin-top: 12px; padding: 10px 14px; color: #2e7d32; background: #e8f5e9; border-radius: 6px; }
+  #log { margin-top: 12px; font-size: 12px; color: #666; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<h2 style="font-size:16px;margin:0 0 12px">第2节 章节测验</h2>
+
+<!-- Q1 单选：.singleQuesId > .TiMu[data=0]，选项零 input，答案写 hidden[name=answerq1] -->
+<div class="singleQuesId" data="q1">
+  <div class="TiMu newTiMu" data="0">
+    <div class="Zy_TItle clearfix">
+      <i class="fl" role="option">1</i>
+      <div class="clearfix fontLabel">
+        <span class="newZy_TItle">【单选题】</span>
+        <p style="display:inline">HTTP 协议默认使用的端口号是？</p>
+      </div>
+    </div>
+    <div class="clearfix">
+      <ul class="Zy_ulTop w-top fl">
+        <li class="before-after" onclick="addChoice(this);" qid="q1" qtype="0" role="radio" aria-label="A 21选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq1" name="answerq1" data="A">A</span></label>
+          <a class="fl after"><p>21</p></a>
+          <div class="clear"></div>
+        </li>
+        <li class="before-after" onclick="addChoice(this);" qid="q1" qtype="0" role="radio" aria-label="B 80选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq1" name="answerq1" data="B">B</span></label>
+          <a class="fl after"><p>80</p></a>
+          <div class="clear"></div>
+        </li>
+        <li class="before-after" onclick="addChoice(this);" qid="q1" qtype="0" role="radio" aria-label="C 443选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq1" name="answerq1" data="C">C</span></label>
+          <a class="fl after"><p>443</p></a>
+          <div class="clear"></div>
+        </li>
+        <li class="before-after" onclick="addChoice(this);" qid="q1" qtype="0" role="radio" aria-label="D 3306选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq1" name="answerq1" data="D">D</span></label>
+          <a class="fl after"><p>3306</p></a>
+          <div class="clear"></div>
+        </li>
+      </ul>
+      <input type="hidden" name="answerq1" id="answerq1" value="">
+      <input type="hidden" id="answertypeq1" name="answertypeq1" value="0">
+    </div>
+  </div>
+</div>
+
+<!-- Q2 多选：.TiMu[data=1]，qtype=1 -->
+<div class="singleQuesId" data="q2">
+  <div class="TiMu newTiMu" data="1">
+    <div class="Zy_TItle clearfix">
+      <i class="fl" role="option">2</i>
+      <div class="clearfix fontLabel">
+        <span class="newZy_TItle">【多选题】</span>
+        <p style="display:inline">下列哪些属于面向对象的特征？</p>
+      </div>
+    </div>
+    <div class="clearfix">
+      <ul class="Zy_ulTop w-top fl">
+        <li class="before-after" onclick="addChoice(this);" qid="q2" qtype="1" role="checkbox" aria-label="A 封装选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq2" name="answerq2" data="A">A</span></label>
+          <a class="fl after"><p>封装</p></a>
+          <div class="clear"></div>
+        </li>
+        <li class="before-after" onclick="addChoice(this);" qid="q2" qtype="1" role="checkbox" aria-label="B 继承选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq2" name="answerq2" data="B">B</span></label>
+          <a class="fl after"><p>继承</p></a>
+          <div class="clear"></div>
+        </li>
+        <li class="before-after" onclick="addChoice(this);" qid="q2" qtype="1" role="checkbox" aria-label="C 多态选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq2" name="answerq2" data="C">C</span></label>
+          <a class="fl after"><p>多态</p></a>
+          <div class="clear"></div>
+        </li>
+        <li class="before-after" onclick="addChoice(this);" qid="q2" qtype="1" role="checkbox" aria-label="D 编译选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq2" name="answerq2" data="D">D</span></label>
+          <a class="fl after"><p>编译</p></a>
+          <div class="clear"></div>
+        </li>
+      </ul>
+      <input type="hidden" name="answerq2" id="answerq2" value="">
+      <input type="hidden" id="answertypeq2" name="answertypeq2" value="1">
+    </div>
+  </div>
+</div>
+
+<!-- Q3 判断：.TiMu[data=3] + .Py_tk，aria-label 对选择/错选择，data=true/false -->
+<div class="singleQuesId" data="q3">
+  <div class="TiMu newTiMu" data="3">
+    <div class="Zy_TItle clearfix">
+      <i class="fl" role="option">3</i>
+      <div class="clearfix fontLabel">
+        <span class="newZy_TItle">【判断题】</span>
+        <p style="display:inline">HTTP 是无状态协议。</p>
+      </div>
+    </div>
+    <div class="Py_tk">
+      <ul class="Zy_ulTop w-top fl">
+        <li class="before-after" onclick="addChoice(this);" qid="q3" qtype="3" role="radio" aria-label="对选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq3" name="answerq3" data="true">A</span></label>
+          <a class="fl after">对</a>
+          <div class="clear"></div>
+        </li>
+        <li class="before-after" onclick="addChoice(this);" qid="q3" qtype="3" role="radio" aria-label="错选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq3" name="answerq3" data="false">B</span></label>
+          <a class="fl after">错</a>
+          <div class="clear"></div>
+        </li>
+      </ul>
+      <input type="hidden" name="answerq3" id="answerq3" value="">
+      <input type="hidden" id="answertypeq3" name="answertypeq3" value="3">
+    </div>
+  </div>
+</div>
+
+<!-- Q4 填空：.TiMu[data=2]，两个 textarea[id^=answer]，答案用 | 分隔（t4） -->
+<div class="singleQuesId" data="q4">
+  <div class="TiMu newTiMu" data="2">
+    <div class="Zy_TItle clearfix">
+      <i class="fl" role="option">4</i>
+      <div class="clearfix fontLabel">
+        <span class="newZy_TItle">【填空题】</span>
+        <p style="display:inline">TCP 的传输层协议名是___，HTTP 默认端口是___。</p>
+      </div>
+    </div>
+    <div class="Zy_ulTk">
+      <textarea id="answerq4_1" name="answerq4_1" rows="2" placeholder="第1空"></textarea>
+      <textarea id="answerq4_2" name="answerq4_2" rows="2" placeholder="第2空"></textarea>
+      <input type="hidden" name="answerq4" id="answerq4" value="">
+      <input type="hidden" id="answertypeq4" name="answertypeq4" value="2">
+    </div>
+  </div>
+</div>
+
+<!-- Q5 简答：.TiMu[data=4]，单个 textarea；默认 answerSubjective=false → 不作答但流程继续（t4） -->
+<div class="singleQuesId" data="q5">
+  <div class="TiMu newTiMu" data="4">
+    <div class="Zy_TItle clearfix">
+      <i class="fl" role="option">5</i>
+      <div class="clearfix fontLabel">
+        <span class="newZy_TItle">【简答题】</span>
+        <p style="display:inline">简述 TCP 三次握手的过程。</p>
+      </div>
+    </div>
+    <div class="Zy_ulTk">
+      <textarea id="answerq5_1" name="answerq5_1" rows="4" placeholder="请作答"></textarea>
+      <input type="hidden" name="answerq5" id="answerq5" value="">
+      <input type="hidden" id="answertypeq5" name="answertypeq5" value="4">
+    </div>
+  </div>
+</div>
+
+<!-- Q6 题干含"计算机网络"、题型在 .mark_name（无 .newZy_TItle）：t22/F1 回归用例。
+     期望：题型文字守卫不采用题干 → 靠结构判成单选 → 正常作答。 -->
+<div class="singleQuesId" data="q6">
+  <div class="TiMu newTiMu" data="0">
+    <div class="Zy_TItle clearfix">
+      <i class="fl" role="option">6</i>
+      <div class="mark_name">以下关于计算机网络的描述，正确的是？</div>
+    </div>
+    <div class="clearfix">
+      <ul class="Zy_ulTop w-top fl">
+        <li class="before-after" onclick="addChoice(this);" qid="q6" qtype="0" role="radio" aria-label="A 选项选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq6" name="answerq6" data="A">A</span></label>
+          <a class="fl after"><p>网络通过分层解耦各层职责</p></a>
+          <div class="clear"></div>
+        </li>
+        <li class="before-after" onclick="addChoice(this);" qid="q6" qtype="0" role="radio" aria-label="B 选项选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq6" name="answerq6" data="B">B</span></label>
+          <a class="fl after"><p>网络必须集中管理</p></a>
+          <div class="clear"></div>
+        </li>
+        <li class="before-after" onclick="addChoice(this);" qid="q6" qtype="0" role="radio" aria-label="C 选项选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq6" name="answerq6" data="C">C</span></label>
+          <a class="fl after"><p>网络只支持有线介质</p></a>
+          <div class="clear"></div>
+        </li>
+        <li class="before-after" onclick="addChoice(this);" qid="q6" qtype="0" role="radio" aria-label="D 选项选择" aria-checked="false">
+          <label class="fl before"><span class="num_option choiceq6" name="answerq6" data="D">D</span></label>
+          <a class="fl after"><p>网络不需要协议</p></a>
+          <div class="clear"></div>
+        </li>
+      </ul>
+      <input type="hidden" name="answerq6" id="answerq6" value="">
+      <input type="hidden" id="answertypeq6" name="answertypeq6" value="0">
+    </div>
+  </div>
+</div>
+
+<a class="btnSubmit" id="submitBtn">提交</a>
+<div id="result"></div>
+<div id="log"></div>
+
+<script>
+  // 真实交互：选项零 input，addChoice(li) 把值写进 hidden[name=answer{qid}]，
+  // 并设置 aria-checked / span.check_answer；同一项再点一次 = 取消（脚本必须避免重复点）。
+  function addChoice(li) {
+    var qid = li.getAttribute('qid');
+    var type = li.getAttribute('qtype');
+    // t6：记录"第一次点选项的时间"与总次数 —— 用于证明采集阶段零点击
+    var T = window.__TEST || (window.__TEST = {});
+    if (!T.firstClickAt) T.firstClickAt = Date.now();
+    T.optionClicks = (T.optionClicks || 0) + 1;
+    var ul = li.parentElement;
+    var num = li.querySelector('span.num_option');
+    var val = num ? num.getAttribute('data') : '';
+    var hidden = document.getElementById('answer' + qid);
+    var wasOn = li.getAttribute('aria-checked') === 'true';
+    var mark = function (el, on) {
+      el.setAttribute('aria-checked', on ? 'true' : 'false');
+      var ck = el.querySelector('.check_answer');
+      if (on) {
+        if (!ck) {
+          ck = document.createElement('span');
+          ck.className = 'check_answer';
+          ck.textContent = '✓';
+          var after = el.querySelector('a.fl.after');
+          (after || el).appendChild(ck);
+        }
+      } else if (ck) {
+        ck.parentNode.removeChild(ck);
+      }
+    };
+    if (type === '1') {
+      mark(li, !wasOn);  // 多选：切换
+      var picked = Array.prototype.slice.call(ul.querySelectorAll('li.before-after'))
+        .filter(function (x) { return x.getAttribute('aria-checked') === 'true'; })
+        .map(function (x) { return x.querySelector('span.num_option').getAttribute('data'); });
+      hidden.value = picked.join('');
+    } else if (wasOn) {
+      mark(li, false);   // 单选/判断：再点同项 = 取消
+      hidden.value = '';
+    } else {
+      Array.prototype.slice.call(ul.querySelectorAll('li.before-after'))
+        .forEach(function (x) { mark(x, false); });
+      mark(li, true);
+      hidden.value = val;
+    }
+    log('[page] ' + qid + ' 当前答案=' + JSON.stringify(hidden.value));
+  }
+  window.addChoice = addChoice;
+
+  function log(msg) {
+    window.__TEST.logs.push(msg);
+    var el = document.getElementById('log');
+    if (el) el.textContent = window.__TEST.logs.join('\n');
+  }
+
+  window.__TEST = {
+    logs: [],
+    submitClicked: false,
+    confirmClicked: false,
+    cancelClicked: false,
+    qCount: function () { return document.querySelectorAll('.TiMu').length; },
+    // 零 input 的判据：页面里 radio/checkbox 数量必须为 0
+    inputCount: function () { return document.querySelectorAll('input[type=radio],input[type=checkbox]').length; },
+    answeredCount: function () {
+      // 一道题只要"有答案"就计数：objective 看 hidden，填空/简答看 textarea（t4）
+      return Array.prototype.slice.call(document.querySelectorAll('.singleQuesId')).filter(function (w) {
+        var block = w.querySelector('.TiMu');
+        var hidden = block.querySelector('input[name^="answer"]:not([name^="answertype"])');
+        if (hidden && hidden.value) return true;
+        return Array.prototype.slice.call(block.querySelectorAll('textarea'))
+          .some(function (t) { return !!String(t.value || '').trim(); });
+      }).length;
+    },
+    // dump 从 hidden input / textarea 读，而不是从 input:checked 读（真实页面只有 hidden）
+    dump: function () {
+      var out = [];
+      Array.prototype.slice.call(document.querySelectorAll('.singleQuesId')).forEach(function (w, bi) {
+        var block = w.querySelector('.TiMu');
+        var hidden = block.querySelector('input[name^="answer"]:not([name^="answertype"])');
+        var qtype = block.getAttribute('data');
+        var title = (block.querySelector('.fontLabel, .mark_name') || {}).textContent || '';
+        var picked = [];
+        var blanks = Array.prototype.slice.call(block.querySelectorAll('textarea'))
+          .map(function (t) { return String(t.value || ''); });
+        if (hidden && hidden.value) {
+          if (qtype === '3') {
+            picked = [hidden.value + ':' + (hidden.value === 'true' ? '对' : '错')];
+          } else {
+            picked = String(hidden.value).split('').map(function (v) {
+              var li = Array.prototype.slice.call(block.querySelectorAll('li.before-after'))
+                .filter(function (x) {
+                  var n = x.querySelector('span.num_option');
+                  return n && n.getAttribute('data') === v;
+                })[0];
+              return v + ':' + (li ? li.textContent.replace(/\s+/g, ' ').trim() : '');
+            });
+          }
+        }
+        out.push({ block: bi + 1, title: title.trim(), picked: picked, qtype: qtype, blanks: blanks });
+      });
+      return out;
+    },
+    resultText: function () { return (document.getElementById('result') || {}).textContent || ''; },
+    finished: function () { return document.getElementById('result').style.display === 'block'; },
+    markingVisible: function () {
+      var d = topDocument();
+      var box = d.getElementById('cxas-mock-marking');
+      if (!box) return false;
+      return box.getBoundingClientRect().width > 0;
+    },
+  };
+
+  function topDocument() {
+    try { return window.top.document; } catch (e) { return document; }
+  }
+
+  // 提交 → 在**顶层文档**渲染 .popDiv.Marking（真实结构；单文档时就地渲染）
+  function showMarking() {
+    var d = topDocument();
+    var box = d.getElementById('cxas-mock-marking');
+    if (!box) {
+      box = d.createElement('div');
+      box.id = 'cxas-mock-marking';
+      box.className = 'popDiv Marking';
+      box.style.cssText = 'position:fixed;left:50%;top:30%;transform:translate(-50%,-50%);' +
+        'background:#fff;border:1px solid #ccc;border-radius:8px;padding:18px 22px;z-index:99999;' +
+        'box-shadow:0 8px 24px rgba(0,0,0,.2);min-width:220px';
+      box.innerHTML = '<div id="popcontent">确认提交？</div>' +
+        '<div style="margin-top:12px;text-align:right">' +
+        '<a class="jb_btn jb_btn_92" style="margin-right:12px;color:#1e6fff;cursor:pointer">提交</a>' +
+        '<a class="jb_btn jb_btn_93" style="color:#999;cursor:pointer">取消</a></div>';
+      box.querySelector('.jb_btn_92').addEventListener('click', function () { confirmOk(box); });
+      box.querySelector('.jb_btn_93').addEventListener('click', function () { cancelOk(box); });
+      d.body.appendChild(box);
+    }
+    box.style.display = 'block';
+  }
+  window.__MOCK_SHOW_MARKING__ = showMarking;
+
+  function confirmOk(box) {
+    window.__TEST.confirmClicked = true;
+    try { localStorage.setItem('test_confirm_clicked', '1'); } catch (e) { /* 忽略 */ }
+    box.style.display = 'none';
+    var resultEl = document.getElementById('result');
+    resultEl.textContent = '已完成 · 第1次作答 · 本次成绩100分 ';
+    var back = document.createElement('a');
+    back.className = 'backBtn'; back.id = 'backBtn'; back.textContent = '返回课程';
+    back.style.cssText = 'margin-left:12px;color:#1e6fff;cursor:pointer';
+    back.addEventListener('click', function (e) { e.preventDefault(); window.__TEST.backClicked = true; log('[page] 点了返回课程'); });
+    resultEl.appendChild(back);
+    resultEl.style.display = 'block';
+    document.getElementById('submitBtn').style.display = 'none';
+    // 批阅状态下由顶层文档渲染真实"下一节"按钮（t20：脚本应优先点它）
+    try {
+      if (window.top && window.top !== window && typeof window.top.__SHOW_NEXT__ === 'function') {
+        window.top.__SHOW_NEXT__();
+      }
+    } catch (e) { /* 跨域忽略 */ }
+    log('[page] 已确认提交，出现成绩文本');
+  }
+
+  function cancelOk(box) {
+    window.__TEST.cancelClicked = true;
+    try { localStorage.setItem('test_cancel_clicked', '1'); } catch (e) { /* 忽略 */ }
+    box.style.display = 'none';
+    log('[page] 用户点了取消');
+  }
+
+  document.getElementById('submitBtn').addEventListener('click', function () {
+    window.__TEST.submitClicked = true;
+    try { localStorage.setItem('test_submit_clicked', '1'); } catch (e) { /* 忽略 */ }
+    log('[page] 点了提交，弹出 .popDiv.Marking 确认层');
+    showMarking();
+  });
+
+  // 成绩页的"返回课程"按钮在确认成功后动态创建（见 confirmOk），
+  // 脚本的 backToCourse 会点它，而不是 history.back() 整页回退。
+</script>
+<script src="/user.js"></script>
+</body>
+</html>

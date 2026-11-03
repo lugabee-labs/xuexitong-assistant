@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>单文档视频页（t28 探针：当前节永不出现完成标记）</title>
+<style>
+  body { margin: 0; padding: 12px; font-family: -apple-system, "Microsoft YaHei", sans-serif; }
+  #v { width: 320px; height: 180px; background: #000; display: block; }
+  .posCatalog { margin-top: 10px; border: 1px solid #ddd; width: 260px; }
+  .chapter_item { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; cursor: pointer; }
+  .chapter_item.currents { color: #1e6fff; background: #f0f6ff; }
+</style>
+</head>
+<body>
+<!-- 单文档：视频、目录、完成标记族全在同一页 —— 让 waitForCompletion 走"顶层自己判定"的路径，
+     避免 iframe 里 allDocs() 看不到父文档导致 completionMarkerFamilyPresent=false 的干扰。 -->
+<video id="v" src="/test.webm" muted playsinline></video>
+<div class="posCatalog" id="catalog">
+  <div class="chapter_item currents" data-idx="0"><a href="javascript:void(0)">第1节 视频任务点</a></div>
+  <div class="chapter_item" data-idx="1"><a href="javascript:void(0)">第2节 视频任务点</a></div>
+</div>
+<!-- 完成标记族存在，但**不在当前节**：当前节永远拿不到标记，用来验证"重播 N 次后必硬跳" -->
+<i class="icon_Completed"></i>
+<div class="maskDiv jobCountDiv" id="jobCountDiv" style="display:none">
+  今日视频任务点完成数已达上限，您可以观看视频，但无法完成任务点
+</div>
+
+<script>
+  window.__TEST = {
+    switches: 0,
+    logs: [],
+    video: function () { return document.getElementById('v'); },
+    currentIdx: function () {
+      var nodes = Array.prototype.slice.call(document.querySelectorAll('.chapter_item'));
+      return nodes.findIndex(function (n) { return n.classList.contains('currents'); });
+    },
+    currentNodeHasMark: function () {
+      var nodes = Array.prototype.slice.call(document.querySelectorAll('.chapter_item'));
+      var cur = nodes.filter(function (n) { return n.classList.contains('currents'); })[0];
+      return !!(cur && cur.querySelector('.icon_Completed'));
+    }
+  };
+
+  Array.prototype.slice.call(document.querySelectorAll('.chapter_item')).forEach(function (n) {
+    n.addEventListener('click', function () {
+      window.__TEST.switches++;
+      window.__TEST.logs.push('[page] 切到第 ' + (Number(n.dataset.idx) + 1) + ' 节');
+      Array.prototype.slice.call(document.querySelectorAll('.chapter_item')).forEach(function (x) {
+        x.classList.remove('currents');
+      });
+      n.classList.add('currents');
+    });
+  });
+
+  var v = document.getElementById('v');
+  v.muted = true;
+  var p = v.play();
+  if (p && p.catch) p.catch(function () { /* 自动播放被拦时留给脚本处理 */ });
+</script>
+<script src="/user.js"></script>
+</body>
+</html>

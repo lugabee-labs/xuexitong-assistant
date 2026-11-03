@@ -1,0 +1,44 @@
+# ---- 调研抓取中间产物 ----
+research/raw/
+research/readmes/
+research/issues/
+research/gh/
+research/*.ps1
+research/*.html
+research/*.log
+research/*_log*.txt
+research/*.tsv
+research/*_raw.json
+research/selected_meta.csv
+research/greasyfork.txt
+research/_*
+
+# ---- 本地备份 ----
+*.bak.js
+
+# ---- AgentTeams 运行时状态 ----
+.agent-teams/
+
+# ---- 本地杂项（非本项目，含独立 .git，不能当 gitlink 提交） ----
+research/dsh-*/
+
+# ---- 其它会话的研究产物（与本项目无关，不应入库） ----
+research/reports/
+research/dsh-mobile-ui-*.md
+
+# ---- 安卓/UI 调试工作区的产物（已迁到 D:\DSH\调试工作，此处是原处残留） ----
+# 这些目录里有大量 junction 指向 node_modules，绝不能入库
+dsh-plugin-adapt/
+pr-work/
+work/
+tools/apk/
+tools/platform-tools/
+tools/platform-tools-*.zip
+
+# ---- 可视化验证截图（临时产物） ----
+tests/_shots/
+
+# ---- 临时文件（写 commit message 用） ----
+_msg*.txt
+_scrub*.js
+_bump*.js

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>视频播放器 - 学习通模拟</title>
+<style>
+  html, body { margin: 0; background: #111; color: #ddd; font-family: "Microsoft YaHei", sans-serif; }
+  video { width: 100%; max-height: 55vh; background: #000; display: block; }
+  .vjs-big-play-button {
+    position: absolute; left: 50%; top: 28%; transform: translate(-50%, -50%);
+    width: 80px; height: 52px; line-height: 52px; text-align: center; font-size: 26px;
+    border-radius: 8px; background: rgba(0,0,0,.65); color: #fff; cursor: pointer;
+  }
+  .ans-videoquiz {
+    position: absolute; left: 16px; top: 16px; width: 440px; padding: 14px;
+    background: #fff; color: #222; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.25); z-index: 100;
+  }
+  .tkTopic { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+  .ans-videoquiz-opts { list-style: none; margin: 0; padding: 0; }
+  .ans-videoquiz-opt { padding: 5px 4px; font-size: 13px; cursor: pointer; }
+  .tkRadio { margin-right: 6px; }
+  #videoquiz-submit, #videoquiz-continue {
+    display: inline-block; margin-top: 10px; padding: 5px 16px; border-radius: 6px;
+    background: #1e6fff; color: #fff; text-decoration: none; cursor: pointer;
+  }
+  #log { position: absolute; left: 8px; bottom: 8px; font-size: 11px; color: #8a8a8a; white-space: pre-wrap; max-width: 90%; }
+</style>
+</head>
+<body>
+<video id="video_html5_api" muted preload="auto"></video>
+<div class="vjs-big-play-button" id="bigplay" style="display:none">▶</div>
+
+<!-- 弹题：真实结构 .tkTopic + li.ans-videoquiz-opt > label > span.tkRadio > input + a#videoquiz-submit -->
+<div class="ans-videoquiz" id="videoquiz-1" style="display:none">
+  <div class="tkTopic"><div class="tkTopic_con tkScroll">下列哪一项是可靠的传输层协议？</div></div>
+  <ul class="ans-videoquiz-opts">
+    <li class="ans-videoquiz-opt"><label><span class="tkRadio"><input type="radio" name="ans-videoquiz-opt" value="A"></span><span>A. UDP</span></label></li>
+    <li class="ans-videoquiz-opt"><label><span class="tkRadio"><input type="radio" name="ans-videoquiz-opt" value="B"></span><span>B. TCP</span></label></li>
+    <li class="ans-videoquiz-opt"><label><span class="tkRadio"><input type="radio" name="ans-videoquiz-opt" value="C"></span><span>C. IP</span></label></li>
+    <li class="ans-videoquiz-opt"><label><span class="tkRadio"><input type="radio" name="ans-videoquiz-opt" value="D"></span><span>D. ARP</span></label></li>
+  </ul>
+  <a id="videoquiz-submit" href="javascript:void(0)">提交</a>
+  <a id="videoquiz-continue" href="javascript:void(0)" style="display:none">继续学习</a>
+</div>
+
+<div id="log"></div>
+
+<script>
+  var qs = location.search || '';
+  var ch = (qs.match(/ch=(\d+)/) || [])[1] || '0';
+  var wantQuiz = /(^|[?&])quiz=1(&|$)/.test(qs);
+
+  var v = document.getElementById('video_html5_api');
+  var box = document.getElementById('videoquiz-1');
+  var liClicks = 0;
+
+  window.__TEST = {
+    logs: [],
+    liClicks: function () { return liClicks; },
+    quizSubmitted: false,
+    submitPayload: null,
+    continueClicked: false,
+    quizVisible: function () { return box.style.display !== 'none'; },
+    picked: function () {
+      return Array.prototype.slice.call(box.querySelectorAll('input'))
+        .map(function (i, idx) { return i.checked ? idx : -1; })
+        .filter(function (i) { return i >= 0; });
+    },
+    pickedText: function () {
+      return Array.prototype.slice.call(box.querySelectorAll('input'))
+        .map(function (i, idx) { return i.checked ? (i.value + ':' + (i.closest('label') || i.parentElement).textContent.trim()) : null; })
+        .filter(Boolean);
+    },
+  };
+
+  function log(msg) {
+    window.__TEST.logs.push(msg);
+    document.getElementById('log').textContent = window.__TEST.logs.join('\n');
+  }
+
+  // 视频地址带 ch 参数：换节时 currentSrc 变化 → 脚本的 videoKey/loadstart 重置都能触发
+  v.src = '/test.webm?ch=' + ch;
+
+  ['play', 'pause', 'ended', 'seeking', 'loadedmetadata'].forEach(function (ev) {
+    v.addEventListener(ev, function () {
+      log('[video] ' + ev + (ev === 'loadedmetadata' ? ' duration=' + v.duration.toFixed(2) : ''));
+    });
+  });
+
+  // 只记录"直接点在 li 上"的次数：脚本必须点 input/label，不能点 li。
+  // 点 label/input 会冒泡到 li，所以要用 e.target === li 排除掉冒泡。
+  Array.prototype.slice.call(box.querySelectorAll('li.ans-videoquiz-opt')).forEach(function (li) {
+    li.addEventListener('click', function (e) { if (e.target === li) liClicks++; });
+  });
+
+  if (wantQuiz) {
+    setTimeout(function () { box.style.display = 'block'; log('[page] 弹题出现'); }, 600);
+  }
+
+  document.getElementById('videoquiz-submit').addEventListener('click', function () {
+    window.__TEST.quizSubmitted = true;
+    window.__TEST.submitPayload = window.__TEST.pickedText();
+    log('[page] 弹题已提交，选中=' + JSON.stringify(window.__TEST.submitPayload));
+    // 真实行为：提交后选项与提交按钮消失、出现"继续学习"，容器本身仍可见
+    Array.prototype.slice.call(box.querySelectorAll('.ans-videoquiz-opts')).forEach(function (n) { n.style.display = 'none'; });
+    document.getElementById('videoquiz-submit').style.display = 'none';
+    document.getElementById('videoquiz-continue').style.display = 'inline-block';
+  });
+
+  document.getElementById('videoquiz-continue').addEventListener('click', function () {
+    window.__TEST.continueClicked = true;
+    log('[page] 点了继续学习');
+    box.style.display = 'none';
+    try { v.play(); } catch (e) { /* 忽略 */ }
+  });
+
+  document.getElementById('bigplay').addEventListener('click', function () {
+    log('[page] 点了大播放按钮');
+    try { v.play(); } catch (e) { /* 忽略 */ }
+  });
+</script>
+<script src="/user.js"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+name: 问题反馈
+description: 脚本没按预期工作 / 平台改版后失效 / 需要帮助定位
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。为了让问题能被快速定位，请把下面几项填全 —— 缺信息的问题通常只能停在"我这边复现不了"。
+
+        > ⚠️ 贴任何截图或日志前请**先脱敏**：删掉姓名、学号、Cookie、API Key、验证码页面。
+        > 本项目不会、也无法帮你绕过验证码或人脸核验。
+
+  - type: input
+    id: version
+    attributes:
+      label: 脚本版本
+      description: 面板标题里那串 `vX.Y.Z`，或脚本头部的 `@version`
+      placeholder: v4.0.1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 学校用的学习通版本
+      options:
+        - 经典版（mooc1，地址里是 mooc1.chaoxing.com）
+        - 新泛雅（fycourse.fanya.chaoxing.com 外壳）
+        - 新版目录（mooc2-ans.chaoxing.com）
+        - 不确定
+    validations:
+      required: true
+
+  - type: dropdown
+    id: manager
+    attributes:
+      label: 脚本管理器
+      options:
+        - Tampermonkey
+        - ScriptCat
+        - Violentmonkey
+        - 其它
+    validations:
+      required: true
+
+  - type: textarea
+    id: symptom
+    attributes:
+      label: 现象
+      description: 面板上那几行分别是什么？（状态 / 视频 / 进度 / 音频 / 人脸核验 / 抖动自检 / 本页任务点 / 最近动作）
+      placeholder: |
+        状态：运行中 ｜ 视频：未检测到 ｜ 进度：0%
+        最近动作：未找到下一任务点
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 从哪个页面进入、点了什么、等了多久、是否刷新过
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 导出的日志（可选但强烈建议）
+      description: 面板右下角「导出日志」，脱敏后贴进来
+      render: text
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已阅读 README 与 docs/troubleshooting.md，并确认这不是已知限制
+          required: true
+        - label: 我理解该项目不提供绕过验证码 / 人脸核验的功能
+          required: true
+        - label: 我已删除截图与日志中的个人信息与凭据
+          required: true

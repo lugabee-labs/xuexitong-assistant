@@ -1,0 +1,19 @@
+# 统一换行符：索引里存 LF，任何平台 checkout 也都是 LF。
+# 起因：一次 PowerShell 多行替换里用了 CRLF、而文件是 LF，匹配跑偏，
+#      把整个 tickVideo() 函数删掉了。让工作树恒定 LF 可以根治这类事故。
+* text=auto eol=lf
+
+# 二进制文件不做任何换行转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.mp4 binary
+*.webm binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.zip binary
+*.gz binary
