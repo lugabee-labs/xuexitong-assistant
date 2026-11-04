@@ -44,7 +44,7 @@
 
 ## 5. 许可与上游声明
 
-- 本项目以 [MIT](LICENSE) 许可发布，署名：**xuexitong-assistant contributors**。
+- 本项目以 [MIT](LICENSE) 许可发布，署名：**mahe-404**（原始作者）、**LUgABeEEE**（v3.0.0 – v4.0.1 改造）。
 - 本项目衍生自上游仓库，**上游未附带明确的许可证文件**。若原作者对当前的署名或许可方式有异议，
   请通过仓库 issue 联系，我们会立即调整或移除相关内容。
 - MIT 许可是「无担保」许可：作者不提供任何明示或暗示的担保（含适销性、特定用途适用性、不侵权）。
@@ -74,6 +74,6 @@ security measures (face verification, CAPTCHA), forge API calls or watch time, a
 or run multiple sessions against one account. Please also comply with the platform's terms of
 service and your institution's academic rules.
 
-Licensed under [MIT](LICENSE) © 2026 xuexitong-assistant contributors. This work is derived from an upstream
+Licensed under [MIT](LICENSE) © 2026 mahe-404 (original author) and LUgABeEEE. This work is derived from an upstream
 repository that does not carry an explicit license file; if the original author objects to the
 current attribution or licensing, please open an issue and it will be adjusted or removed.

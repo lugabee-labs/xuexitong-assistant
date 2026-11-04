@@ -547,7 +547,7 @@ mock 页面用真实结构：零 `input` 的测验选项（`li.before-after` + h
 | 项 | 说明 |
 |---|---|
 | 免责声明 | 新增 [DISCLAIMER.md](DISCLAIMER.md)：性质、风险承担、合规边界、数据处理、上游许可声明（含英文版） |
-| 许可 | 新增 [MIT LICENSE](LICENSE)：署名 xuexitong-assistant contributors |
+| 许可 | 新增 [MIT LICENSE](LICENSE)：署名 mahe-404（原始作者）+ LUgABeEEE |
 | 脱敏 | 测试夹具中的真实课程 / 章节 ID 全部替换为合成值；调研文档中一处真实心跳 URL 的 `enc` / `objectId` / `clazzId` / `jobid` 已替换为占位符 |
 | 文档 | 新增 `docs/architecture.md`、`docs/troubleshooting.md`、`CONTRIBUTING.md`；README 补目录、文档索引、贡献 / 许可 / 致谢 |
 | 版本 | 4.0.1（仅文档与脱敏，脚本逻辑未变） |
@@ -677,15 +677,15 @@ mock 页面用真实结构：零 `input` 的测验选项（`li.before-after` + h
 
 ## 许可
 
-[MIT](LICENSE) © 2026 **xuexitong-assistant contributors**
+[MIT](LICENSE) © 2026 **mahe-404**（原始作者）、**LUgABeEEE**（v3.0.0 – v4.0.1 平台适配与可靠性改造）
 
 仅供个人学习使用。使用者自行承担账号风险，平台服务条款与学校规定请自行遵守——
 本项目不提供、也不接受「绕过平台安全保护措施」的功能（详见 [合规声明](#合规声明)）。
 
 ## 致谢
 
-- **原始脚本作者** —— 视频播放、弹题、章节测验、字体反爬解码等主体逻辑来自上游。
-- **平台适配与可靠性改造** —— 新泛雅 / `mooc2-ans` 跨平台适配、非视频任务点、人脸核验保护、断点续刷、
+- **mahe-404** —— 原始脚本作者。视频播放、弹题、章节测验、字体反爬解码等主体逻辑来自上游。
+- **LUgABeEEE** —— 新泛雅 / `mooc2-ans` 跨平台适配、非视频任务点、人脸核验保护、断点续刷、
   课程链、播放抖动熔断、音频任务点、任务点诊断，以及测试与文档体系。
 - 同类项目的作者（ScriptCat 8529、uxuescript、OCS、dsh-chaoxing 等）—— 结构参考与坑位印证，
   见 [research/](research/)。

@@ -1,5 +1,5 @@
 // 本机可视化验证：真浏览器加载 mock 页面，注入脚本，截图面板（展开 + 折叠）
-// 运行：node tools/_screenshot.js
+// 运行：node tools/screenshot-hud.js
 
 const http = require('http');
 const fs = require('fs');
