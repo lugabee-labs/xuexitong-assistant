@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通自动学习助手
 // @namespace    https://scriptcat.org/scripts/chaoxing-auto-study
-// @version      4.0.3
+// @version      4.0.4
 // @description  自动播放学习通/超星课程视频、解码 font-cxsecret 混淆字体、自动完成视频弹题与章节测验、自动跳转下一任务点，可接入 DeepSeek / OpenCode Go 答题。适配脚本猫(ScriptCat)、油猴(Tampermonkey)、暴力猴(Violentmonkey)。
 // @author       学习通助手
 // @match        *://*.chaoxing.com/*
@@ -2707,7 +2707,13 @@
       stats.lastAction = '未找到下一任务点';
       return;
     }
-    const next = nodes[idx + 1];
+    /* v4.0.4：下一个目录项可能是「章标题」或 0 任务点的「章节讨论」。
+     * 实测直接点过去会整页跳去 groupweb 话题详情，学习页脚本再也接管不了（卡死）。
+     * 规则：只挑「还有待完成任务点」的下一项；章标题 / 已完成项 / 0 点讨论全部跳过。 */
+    const hasPendingPoint = (n) => /个待完成任务点/.test(String((n && n.textContent) || ''));
+    let pick = idx + 1;
+    while (pick < nodes.length && !hasPendingPoint(nodes[pick])) pick++;
+    const next = nodes[pick];
     if (!next) {
       stats.lastAction = '已是最后一个任务点';
       /* 课程链：本课没有下一节了，标记就绪并回课程列表（是否真的换课见 tryChainOnListPage） */
@@ -3924,7 +3930,7 @@
       };
       // OpenCode Go 的接入要求：自报身份 + 稳定会话 ID
       if (CFG.aiProvider === 'opencode-go') {
-        headers['User-Agent'] = 'xuexitong-assistant/4.0.3 (+userscript)';
+        headers['User-Agent'] = 'xuexitong-assistant/4.0.4 (+userscript)';
         headers['x-opencode-session'] = AI_SESSION_ID;
       }
       const finish = (raw) => {
@@ -4295,11 +4301,11 @@
 
     const title = doc.createElement('div');
     /* 已知残留（t14/F3，本轮不修）：
-     * 标题仍是固定文本「学习通助手 v4.0.3」——指纹随机化只挡住了 id/class 选择器层，
+     * 标题仍是固定文本「学习通助手 v4.0.4」——指纹随机化只挡住了 id/class 选择器层，
      * 平台仍可用 textContent 匹配到面板；而我们自己的 hud/jump/answer e2e 也正是靠这段文案
      * 定位面板。所以标题与版本号必须一起处理：将来改成不含固定名称的文案时，
      * 不含固定名称的文案（或按配置隐藏），并同步改三处 e2e 的定位口径。 */
-    title.textContent = '学习通助手 v4.0.3';
+    title.textContent = '学习通助手 v4.0.4';
     title.className = FINGERPRINT.cls.title;
     title.style.cssText = 'font-weight:600;font-size:13px;margin-bottom:' + M.titleGap + 'px;';
 
@@ -4379,7 +4385,7 @@
         if (stats.face) bits.push('人脸');
         title.textContent = '学习通助手 ▸ ' + bits.join(' · ');
       } else {
-        title.textContent = '学习通助手 v4.0.3 ▾';
+        title.textContent = '学习通助手 v4.0.4 ▾';
       }
       toggle.textContent = CFG.enabled ? '暂停' : '启动';
       speedBtn.textContent = CFG.speed + 'x';
@@ -4834,7 +4840,7 @@
   if (CFG.verbose || CFG.debugBadge) {
     try {
       win.__CXAS_DEBUG = {
-        version: '4.0.3',
+        version: '4.0.4',
         cfg: CFG,
         stats,
         font: FONT,
