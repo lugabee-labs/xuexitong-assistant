@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通自动学习助手
 // @namespace    https://scriptcat.org/scripts/chaoxing-auto-study
-// @version      4.0.1
+// @version      4.0.2
 // @description  自动播放学习通/超星课程视频、解码 font-cxsecret 混淆字体、自动完成视频弹题与章节测验、自动跳转下一任务点，可接入 DeepSeek / OpenCode Go 答题。适配脚本猫(ScriptCat)、油猴(Tampermonkey)、暴力猴(Violentmonkey)。
 // @author       学习通助手
 // @match        *://*.chaoxing.com/*
@@ -1187,8 +1187,15 @@
     const KEY_PREFIX = 'cxas_hb_';
     let playing = false;
     let conflictWith = null;
+    /* v4.0.2：只有顶层框架参与互斥。
+     * 旧实现里每个 iframe 也各自心跳，同一个标签页的 3 个 frame（顶层 / cards / 视频）
+     * 会被当成 3 个独立标签；顶层发现「ID 更小且正在播」的子框架就主动让路，
+     * 于是顶层暂停视频 → 子框架心跳转 false → 互相礼让，最终谁都不播（自锁）。
+     * TAB_ID 是随机生成的，所以这个自锁时有时无、极难复现。 */
+    const ACTIVE = IS_TOP;
 
     function beat() {
+      if (!ACTIVE) return;
       try {
         localStorage.setItem(KEY_PREFIX + TAB_ID, JSON.stringify({ at: Date.now(), playing }));
       } catch (e) { /* 忽略 */ }
@@ -1214,6 +1221,7 @@
     }
 
     function check() {
+      if (!ACTIVE) return null;
       if (!CFG.singleSession) return null;
       const live = others().filter((o) => o.playing);
       if (!live.length) { conflictWith = null; return null; }
@@ -1229,10 +1237,33 @@
       try { localStorage.removeItem(KEY_PREFIX + TAB_ID); } catch (e) { /* 忽略 */ }
     }
 
+    /* 心跳键只增不减会在 localStorage 里越堆越多（实测一次会话积了 86 个）。
+     * 这里只清明显过期的（超过 4 倍过期阈值），活标签的心跳不碰。 */
+    function purgeStale() {
+      if (!ACTIVE) return 0;
+      const now = Date.now();
+      let removed = 0;
+      try {
+        const dead = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (!k || k.indexOf(KEY_PREFIX) !== 0) continue;
+          let v = null;
+          try { v = JSON.parse(localStorage.getItem(k)); } catch (e) { v = null; }
+          if (!v || !v.at || now - v.at > CFG.sessionStaleMs * 4) dead.push(k);
+        }
+        for (const k of dead) {
+          try { localStorage.removeItem(k); removed++; } catch (e) { /* 忽略 */ }
+        }
+      } catch (e) { /* 忽略 */ }
+      return removed;
+    }
+
     return {
       beat,
       check,
       cleanup,
+      purgeStale,
       setPlaying(v) { playing = !!v; },
       get conflict() { return conflictWith; },
       tabId: TAB_ID,
@@ -3852,7 +3883,7 @@
       };
       // OpenCode Go 的接入要求：自报身份 + 稳定会话 ID
       if (CFG.aiProvider === 'opencode-go') {
-        headers['User-Agent'] = 'xuexitong-assistant/4.0.1 (+userscript)';
+        headers['User-Agent'] = 'xuexitong-assistant/4.0.2 (+userscript)';
         headers['x-opencode-session'] = AI_SESSION_ID;
       }
       const finish = (raw) => {
@@ -4223,11 +4254,11 @@
 
     const title = doc.createElement('div');
     /* 已知残留（t14/F3，本轮不修）：
-     * 标题仍是固定文本「学习通助手 v4.0.1」——指纹随机化只挡住了 id/class 选择器层，
+     * 标题仍是固定文本「学习通助手 v4.0.2」——指纹随机化只挡住了 id/class 选择器层，
      * 平台仍可用 textContent 匹配到面板；而我们自己的 hud/jump/answer e2e 也正是靠这段文案
      * 定位面板。所以标题与版本号必须一起处理：将来改成不含固定名称的文案时，
      * 不含固定名称的文案（或按配置隐藏），并同步改三处 e2e 的定位口径。 */
-    title.textContent = '学习通助手 v4.0.1';
+    title.textContent = '学习通助手 v4.0.2';
     title.className = FINGERPRINT.cls.title;
     title.style.cssText = 'font-weight:600;font-size:13px;margin-bottom:' + M.titleGap + 'px;';
 
@@ -4307,7 +4338,7 @@
         if (stats.face) bits.push('人脸');
         title.textContent = '学习通助手 ▸ ' + bits.join(' · ');
       } else {
-        title.textContent = '学习通助手 v4.0.1 ▾';
+        title.textContent = '学习通助手 v4.0.2 ▾';
       }
       toggle.textContent = CFG.enabled ? '暂停' : '启动';
       speedBtn.textContent = CFG.speed + 'x';
@@ -4586,6 +4617,9 @@
 
   // 单端心跳
   if (CFG.singleSession) {
+    /* v4.0.2：启动先清一次历史遗留心跳（只清明显过期的）。
+     * 之前心跳键只增不减，实测一次会话积了 86 个死键，排查时根本看不出几个标签在学。 */
+    try { const purged = SESSION.purgeStale(); if (purged > 0) log('清理过期会话心跳：' + purged + ' 个'); } catch (e) { /* 忽略 */ }
     SESSION.beat();
     setInterval(SESSION.beat, CFG.sessionBeatMs || 2000);
     win.addEventListener('pagehide', SESSION.cleanup);
@@ -4757,7 +4791,7 @@
   if (CFG.verbose || CFG.debugBadge) {
     try {
       win.__CXAS_DEBUG = {
-        version: '4.0.1',
+        version: '4.0.2',
         cfg: CFG,
         stats,
         font: FONT,
