@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         学习通自动学习助手
 // @namespace    https://scriptcat.org/scripts/chaoxing-auto-study
-// @version      4.0.2
+// @version      4.0.3
 // @description  自动播放学习通/超星课程视频、解码 font-cxsecret 混淆字体、自动完成视频弹题与章节测验、自动跳转下一任务点，可接入 DeepSeek / OpenCode Go 答题。适配脚本猫(ScriptCat)、油猴(Tampermonkey)、暴力猴(Violentmonkey)。
 // @author       学习通助手
 // @match        *://*.chaoxing.com/*
@@ -175,6 +175,11 @@
     solveWork: true,          // 自动作答章节测验/作业（题目页检测到就答）
     autoSubmitQuiz: true,     // 章节测验自动提交（可重做，取最高分，风险低）
     autoSubmitWork: false,    // 作业自动提交（通常只有一次机会，默认关）
+    /* v4.0.3：题目页（章节测验/作业）答完后必须能自己往下走。
+     * 旧行为只有「空小节」和「视频播完」有跳转出口，题目页答完就停在原地——
+     * 一旦安全模式不开交或类型判定为 work，就会永久卡死在该页（实测踩到）。 */
+    advanceAfterWork: true,   // 答完后自动跳下一节
+    skipUnsubmittedWork: true, // 明确不提交时也跳过（任务点不会完成，但不会卡住）
     // 保留字段；**考试提交在 allow 判定里硬禁**（kind==='exam' 直接 false），改这个值无效
     autoSubmitExam: false,
     autoConfirmSubmit: true,  // 提交后自动点"确定"确认框
@@ -3625,6 +3630,41 @@
 
   /* t26/L1：async 主体必须 try/finally —— 调用方（tickWork 与 SOLVE_WORK 消息）都不 await/catch，
    * 内部一旦抛错，workLock 会停在 true、workSolved 已是 true → 该页永久不再重试，只能刷新页面。 */
+  /* v4.0.3：题目页答完后自动往下走。
+   * 目的：修「安全模式不提交 → 永久停在本页」。流程：
+   *   ① 等几秒让平台记完成标记；② 有标记就跳；③ 明确不提交且允许跳过也跳；
+   *   ④ 提交了但标记迟迟不来，最多重试 6 次（约 30 秒）再放弃，不强跳。
+   * 用 currentSectionKey() 做闸门：用户自己点了目录 / 平台换了页就立刻收手。 */
+  let advanceAfterWorkTimer = 0;
+  function scheduleAdvanceAfterWork(allow) {
+    if (!CFG.advanceAfterWork) return;
+    let myKey = '';
+    try { myKey = currentSectionKey(); } catch (e) { myKey = ''; }
+    let tries = 0;
+    const step = () => {
+      try { if (currentSectionKey() !== myKey) return; } catch (e) { return; }
+      tries++;
+      let done = false;
+      try { done = sectionCompleted(allDocs()); } catch (e) { done = false; }
+      if (done) {
+        setAction('本页任务点已完成，跳下一节', { force: true });
+        log('题目页完成标记已出现，跳下一节');
+        goNext();
+        return;
+      }
+      if (!allow && CFG.skipUnsubmittedWork) {
+        setAction('本页不自动提交，按设置跳过（该任务点不会完成）', { force: true });
+        log('题目页未提交，按 skipUnsubmittedWork 跳过');
+        goNext();
+        return;
+      }
+      if (allow && tries < 6) { advanceAfterWorkTimer = setTimeout(step, 5000); return; }
+      setAction('本页已作答但任务点仍未完成，停在此处等你处理', { force: true });
+    };
+    clearTimeout(advanceAfterWorkTimer);
+    advanceAfterWorkTimer = setTimeout(step, Math.max(4000, CFG.workSubmitDelay || 3000) + 3000);
+  }
+
   async function solveWork(docRoot) {
     if (workLock) return;
     try {
@@ -3755,6 +3795,7 @@
     } else {
       workLock = false;
     }
+    scheduleAdvanceAfterWork(allow);
   }
 
   const WORK_KIND_LABEL = {
@@ -3883,7 +3924,7 @@
       };
       // OpenCode Go 的接入要求：自报身份 + 稳定会话 ID
       if (CFG.aiProvider === 'opencode-go') {
-        headers['User-Agent'] = 'xuexitong-assistant/4.0.2 (+userscript)';
+        headers['User-Agent'] = 'xuexitong-assistant/4.0.3 (+userscript)';
         headers['x-opencode-session'] = AI_SESSION_ID;
       }
       const finish = (raw) => {
@@ -4254,11 +4295,11 @@
 
     const title = doc.createElement('div');
     /* 已知残留（t14/F3，本轮不修）：
-     * 标题仍是固定文本「学习通助手 v4.0.2」——指纹随机化只挡住了 id/class 选择器层，
+     * 标题仍是固定文本「学习通助手 v4.0.3」——指纹随机化只挡住了 id/class 选择器层，
      * 平台仍可用 textContent 匹配到面板；而我们自己的 hud/jump/answer e2e 也正是靠这段文案
      * 定位面板。所以标题与版本号必须一起处理：将来改成不含固定名称的文案时，
      * 不含固定名称的文案（或按配置隐藏），并同步改三处 e2e 的定位口径。 */
-    title.textContent = '学习通助手 v4.0.2';
+    title.textContent = '学习通助手 v4.0.3';
     title.className = FINGERPRINT.cls.title;
     title.style.cssText = 'font-weight:600;font-size:13px;margin-bottom:' + M.titleGap + 'px;';
 
@@ -4338,7 +4379,7 @@
         if (stats.face) bits.push('人脸');
         title.textContent = '学习通助手 ▸ ' + bits.join(' · ');
       } else {
-        title.textContent = '学习通助手 v4.0.2 ▾';
+        title.textContent = '学习通助手 v4.0.3 ▾';
       }
       toggle.textContent = CFG.enabled ? '暂停' : '启动';
       speedBtn.textContent = CFG.speed + 'x';
@@ -4389,6 +4430,8 @@
         'AI 答题：' + (aiReady() ? preset.label + ' / ' + CFG.aiModel : (CFG.aiEnabled ? '待配置 Key' : '已关闭')),
         '弹题已作答：' + stats.quiz + ' 次',
         '本页类型：' + WORK_KIND_LABEL[kind] + '（测验' + quizSubmit + ' / 作业' + workSubmit + '）',
+        '题目页跳转：' + (!CFG.advanceAfterWork ? '关（答完停在本页）'
+          : (CFG.skipUnsubmittedWork ? '开（不提交也跳下一节）' : '开（仅完成标记出现才跳）')),
         '题型：' + (stats.qtypes || '—'),
         // t6 两遍法：先采集、后作答，两阶段进度分开显示
         '采集：' + (stats.collected ? '已采集 ' + stats.collected + ' 题（' + (stats.qtypes || '—') + '）' : '—'),
@@ -4791,7 +4834,7 @@
   if (CFG.verbose || CFG.debugBadge) {
     try {
       win.__CXAS_DEBUG = {
-        version: '4.0.2',
+        version: '4.0.3',
         cfg: CFG,
         stats,
         font: FONT,
